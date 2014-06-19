@@ -1,0 +1,9 @@
+Document: python-objgraph-doc
+Title: Python Object Graphs
+Author: Marius Gedminas
+Abstract: objgraph is a module that lets you visually explore Python object graphs
+Section: Programming/Python
+
+Format: HTML
+Index: /usr/share/doc/python-objgraph-doc/html/index.html
+Files: /usr/share/doc/python-objgraph-doc/html/*.html

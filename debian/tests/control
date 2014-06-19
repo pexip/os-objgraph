@@ -1,0 +1,5 @@
+Tests: unittests
+Depends: python-objgraph, python-all, graphviz
+
+Tests: unittests3
+Depends: python3-objgraph, python3-all, graphviz

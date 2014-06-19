@@ -1,0 +1,20 @@
+#!/usr/bin/make -f
+
+export PYBUILD_NAME=objgraph
+
+%:
+	dh $@ --with python2,python3,sphinxdoc --buildsystem=pybuild
+
+override_dh_auto_build:
+	dh_auto_build
+	$(MAKE) docs SPHINXOPTS=-NE
+
+override_dh_auto_clean:
+	dh_auto_clean
+	rm -rf build docs/_build
+
+override_dh_installchangelogs:
+	dh_installchangelogs CHANGES.rst
+
+override_dh_compress:
+	dh_compress -X.txt -X.inv

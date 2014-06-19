@@ -1,0 +1,136 @@
+objgraph (1.8.1-1) unstable; urgency=medium
+
+  [ Stefano Rivera ]
+  * New upstream release.
+  * Refresh patches.
+  * Bump copyright years.
+  * Add DEP-12 upstream metadata.
+
+  [ Andrey Rahmatullin ]
+  * Switch to pybuild.
+  * Switch to debhelper compat level 9.
+
+ -- Stefano Rivera <stefanor@debian.org>  Thu, 19 Jun 2014 23:29:35 +0200
+
+objgraph (1.8.0-1) unstable; urgency=medium
+
+  * New upstream release (Closes: #741822)
+  * Bump Standards-Version to 3.9.5, no changes needed.
+  * The upstream changelog is now CHANGES.rst.
+  * Patch: remove-external-images. Remove references to Travis CI's status
+    image from the documentation.
+
+ -- Stefano Rivera <stefanor@debian.org>  Sat, 12 Apr 2014 16:51:59 +0200
+
+objgraph (1.7.2-2) unstable; urgency=low
+
+  [ Jakub Wilk ]
+  * Use canonical URIs for Vcs-* fields.
+
+  [ Stefano Rivera ]
+  * Upload to unstable, wheezy released.
+  * Bump debhelper compat to 8.
+  * Add autopkgtests.
+  * Switch the debian/watch URL to https.
+  * Don't ship SOURCES.txt.
+
+ -- Stefano Rivera <stefanor@debian.org>  Sun, 26 May 2013 15:37:05 +0200
+
+objgraph (1.7.2-1) experimental; urgency=low
+
+  * New upstream release.
+    - Tests pass on Python 3.3. (Closes: #686331)
+    - Supports file formats besides png.
+  * Upload to experimental, as Debian is frozen for wheezy.
+  * Bump Standards-Version to 3.9.4.
+    - Bump debhelper Build-Depends to 8.1 for build-{arch,indep} support.
+  * Bump machine readable copyright format to 1.0.
+  * Bump copyright years.
+
+ -- Stefano Rivera <stefanor@debian.org>  Sat, 10 Nov 2012 18:59:27 +0200
+
+objgraph (1.7.1-1) unstable; urgency=low
+
+  * New upstream release.
+    - Supports "setup.py test". We now use that, and Build-Depend on
+      python-setuptools + python3-setuptools.
+    - Drop utf8-changes.patch and quoting-py3k-utf8.patch: Superseded
+      upstream.
+  * Use dh_sphinxdoc.
+    - Version python-sphinx Build-Depend.
+    - Drop dh_installdocs override.
+    - Don't manually symlink to libjs-jquery any more.
+  * Don't compress sphinx _sources.
+  * debian/rules: set -x for setup.py loops.
+
+ -- Stefano Rivera <stefanor@debian.org>  Wed, 04 Jan 2012 14:35:50 +0200
+
+objgraph (1.7.0-2) unstable; urgency=low
+
+  * Rebuild for Python transition.
+  * Bump Standards-Version to 3.9.2, no changes needed.
+  * Drop Breaks: ${python:Breaks}, no longer used by dh_python2.
+  * debian/copyright: Update to DEP5 Format r174.
+
+ -- Stefano Rivera <stefanor@debian.org>  Sun, 17 Apr 2011 19:58:04 +0200
+
+objgraph (1.7.0-1) unstable; urgency=low
+
+  * New upstream release.
+    - Update copyright years.
+    - utf8-changes.patch: Fix UnicodeDecodeError in non-UTF-8 locales
+    - quoting-py3k-utf8.patch: Fix quoting.txt test for Py3k + non-UTF-8
+      locales
+  * Update my e-mail address.
+  * Correct DEP3 headers (first line of Description is the subject)
+
+ -- Stefano Rivera <stefanor@debian.org>  Sat, 12 Mar 2011 17:25:37 +0200
+
+objgraph (1.6.0-2) unstable; urgency=low
+
+  * New binary package: python-objgraph-doc
+
+ -- Stefano Rivera <stefano@rivera.za.net>  Sat, 18 Dec 2010 22:30:32 +0200
+
+objgraph (1.6.0-1) unstable; urgency=low
+
+  * New upstream release.
+    - Adds Python 3.x support (LP: #687601)
+  * Refresh patches.
+  * Use upstream example images, rather than re-generating. (LP: #686731)
+
+ -- Stefano Rivera <stefano@rivera.za.net>  Sat, 18 Dec 2010 16:35:11 +0200
+
+objgraph (1.5.0-1) unstable; urgency=low
+
+  * New upstream release
+  * Refresh patches.
+  * debian/control: Reword description.
+  * Build new Sphinx-based documentation
+
+ -- Stefano Rivera <stefano@rivera.za.net>  Wed, 08 Dec 2010 00:13:12 +0200
+
+objgraph (1.4.0-1) experimental; urgency=low
+
+  * New upstream release.
+    - Drop README.Debian: Upstream fixed the issues we were warning about.
+    - Extend copyright years.
+    - Add examples: examples.txt and finalizers.png
+  * Convert from python-support to dh_python2.
+  * Use debhelper's --buildsystem=python_distutils option instead of removing
+    Makefile in clean.
+  * debian/control:
+    - Bump Standards-Version to 3.9.1 (no changes needed).
+    - Suggest: xdot (now packaged)
+  * Patches:
+    - Dropped dont-call-xdot.patch: Now builds and runs with or without an
+      xdot in PATH.
+    - Refreshed Patches.
+
+ -- Stefano Rivera <stefano@rivera.za.net>  Mon, 08 Nov 2010 02:22:13 +0200
+
+objgraph (1.2-1) unstable; urgency=low
+
+  * Initial release (Closes: #566798)
+
+ -- Stefano Rivera <stefano@rivera.za.net>  Thu, 28 Jan 2010 13:00:22 +0200
