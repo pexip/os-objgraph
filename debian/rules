@@ -1,16 +1,39 @@
 #!/usr/bin/make -f
 
-export PYBUILD_NAME=objgraph
+PYVERS :=  $(shell pyversions -r)
+PY3VERS := $(shell py3versions -r)
 
 %:
-	dh $@ --with python2,python3,sphinxdoc --buildsystem=pybuild
+	dh $@ --with python2,python3,sphinxdoc
 
 override_dh_auto_build:
-	dh_auto_build
+	set -e -x; \
+	for py in $(PYVERS) $(PY3VERS); do \
+		$$py setup.py build; \
+	done
 	$(MAKE) docs SPHINXOPTS=-NE
 
+override_dh_auto_test:
+ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
+	set -e -x; \
+	for py in $(PYVERS) $(PY3VERS); do \
+		$$py setup.py test; \
+	done
+endif
+
+override_dh_auto_install:
+	set -e -x; \
+	for py in $(PYVERS); do \
+		$$py setup.py install --skip-build --root debian/python-objgraph --install-layout=deb; \
+	done
+	set -e -x; \
+	for py in $(PY3VERS); do \
+		$$py setup.py install --skip-build --root debian/python3-objgraph --install-layout=deb; \
+	done
+	find debian/python-objgraph debian/python3-objgraph -name SOURCES.txt -delete
+
 override_dh_auto_clean:
-	dh_auto_clean
+	dh_auto_clean --buildsystem=python_distutils
 	rm -rf build docs/_build
 
 override_dh_installchangelogs:
