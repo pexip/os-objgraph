@@ -1,8 +1,9 @@
 Source: objgraph
 Section: python
 Priority: optional
-Maintainer: Debian Python Modules Team <python-modules-team@lists.alioth.debian.org>
-Uploaders: Stefano Rivera <stefanor@debian.org>
+Maintainer: Pexip AS <packaging@pexip.com>
+XSBC-Pexip-Original-Maintainer: Debian Python Modules Team <python-modules-team@lists.alioth.debian.org>
+XSBC-Pexip-Original-Uploaders: Stefano Rivera <stefanor@debian.org>
 Build-Depends:
  debhelper (>= 9),
  dh-python,
@@ -19,6 +20,7 @@ Vcs-Browser: http://anonscm.debian.org/viewvc/python-modules/packages/objgraph/t
 X-Python-Version: >= 2.4
 X-Python3-Version: >= 3.0
 XS-Testsuite: autopkgtest
+XS-Pexip-Upstream: http://ftp.debian.org/debian/ jessie
 
 Package: python-objgraph
 Architecture: all
