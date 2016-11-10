@@ -3,6 +3,67 @@ Changes
 
 .. currentmodule:: objgraph
 
+3.0.1 (2016-09-17)
+------------------
+
+- The ``file`` argument of :func:`show_most_common_types` and
+  :func:`show_growth` now defaults to ``None`` instead of ``sys.stdout``.
+  ``None`` is interpreted to be the same as ``sys.stdout``, which means
+  the right stdout will be used if you change it at runtime (which happens,
+  in doctests).
+
+
+3.0.0 (2016-04-13)
+------------------
+
+- :func:`show_most_common_types` and :func:`show_growth` now accept a ``file``
+  argument if you want to redirect the output elsewhere.
+
+  Fixes `issue 24 <https://github.com/mgedmin/objgraph/pull/24>`_.  Contributed
+  by "d-sun-d".
+
+- Don't trust ``__class__`` to be accurate and ``__name__`` to be a string.
+  Fixes errors in some convoluted corner cases when mocks are involved.
+
+  Contributed by Andrew Shannon Brown in `PR 26
+  <https://github.com/mgedmin/objgraph/pull/26>`_.
+
+- Drop support for Python 2.4, 2.5, and 2.6.
+
+- Drop support for Python 3.1 and 3.2.
+
+- Add support for Python 3.5.
+
+
+2.0.1 (2015-07-28)
+------------------
+
+- Avoid creating reference cycles between the stack frame and the local
+  ``objects`` variable in :func:`by_type`, :func:`count`, and
+  :func:`typestats`.
+
+  Fixes `issue 22 <https://github.com/mgedmin/objgraph/pull/22>`_.  Contributed
+  by Erik Bray.
+
+
+2.0.0 (2015-04-18)
+------------------
+
+- :func:`show_refs` and :func:`show_backrefs` now accept a file-like object
+  (via the new ``output`` argument) as an alternative to a filename.
+
+- Made internal helper methods private. This includes :func:`find_chain`,
+  :func:`show_graph`, :func:`obj_node_id`, :func:`obj_label`, :func:`quote`,
+  :func:`long_typename`, :func:`safe_repr`, :func:`short_repr`, 
+  :func:`gradient`, :func:`edge_label`, and :func:`_program_in_path`.
+
+- Correctly determine the name of old-style classes in :func:`count`,
+  :func:`by_type`, and graph drawing functions.
+
+  Fixes `issue 16 <https://github.com/mgedmin/objgraph/pull/16>`_.  Contributed
+  by Mike Lambert.
+
+
 1.8.1 (2014-05-15)
 ------------------
 

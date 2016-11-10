@@ -1,5 +1,10 @@
 #!/usr/bin/python
-import codecs, os, re, sys, unittest, doctest
+import codecs
+import doctest
+import os
+import re
+import sys
+import unittest
 
 try:
     from setuptools import setup
@@ -29,7 +34,8 @@ def read(filename):
 def unsphinx(text):
     # remove Sphinx extensions used in CHANGES.rst from reStructuredText
     # so that it can be handled by plain docutils
-    return text.replace(':func:', '').replace('.. currentmodule:: objgraph', '')
+    return (text.replace(':func:', '')
+            .replace('.. currentmodule:: objgraph', ''))
 
 
 def get_version():
@@ -48,13 +54,6 @@ def get_description():
     readme = read('README.rst')
     changelog = read('CHANGES.rst')
     description = unsphinx(readme + '\n\n\n' + changelog)
-    if '--unicode-description' in sys.argv:
-        sys.argv.remove('--unicode-description')
-    else:
-        # can't use u'' literals, this is supposed to work on both Py2 and Py3
-        description = description.replace('Kristj%sn' % unichr(0xe1),
-                                          'Kristjan')
-        description = description.encode('ascii', 'replace').decode('ascii')
     return description
 
 
@@ -90,15 +89,12 @@ setup(name='objgraph',
           'Operating System :: OS Independent',
           'Programming Language :: Python',
           'Programming Language :: Python :: 2',
-          'Programming Language :: Python :: 2.4',
-          'Programming Language :: Python :: 2.5',
-          'Programming Language :: Python :: 2.6',
           'Programming Language :: Python :: 2.7',
           'Programming Language :: Python :: 3',
-          'Programming Language :: Python :: 3.1',
-          'Programming Language :: Python :: 3.2',
           'Programming Language :: Python :: 3.3',
           'Programming Language :: Python :: 3.4',
+          'Programming Language :: Python :: 3.5',
       ],
       py_modules=['objgraph'],
+      tests_require=['mock'],
       **setuptools_options)

@@ -1,11 +1,21 @@
 Python Object Graphs
 ====================
 
-.. image:: https://travis-ci.org/mgedmin/objgraph.png?branch=master
+.. image:: https://travis-ci.org/mgedmin/objgraph.svg?branch=master
    :target: https://travis-ci.org/mgedmin/objgraph
+   :alt: Build Status
 
-.. image:: https://coveralls.io/repos/mgedmin/objgraph/badge.png?branch=master
+.. image:: https://ci.appveyor.com/api/projects/status/github/mgedmin/objgraph?branch=master&svg=true
+   :target: https://ci.appveyor.com/project/mgedmin/objgraph
+   :alt: Build Status (Windows)
+
+.. image:: https://coveralls.io/repos/mgedmin/objgraph/badge.svg?branch=master
    :target: https://coveralls.io/r/mgedmin/objgraph?branch=master
+   :alt: Test Coverage
+
+.. image:: https://readthedocs.org/projects/objgraph/badge/?version=latest
+   :target: https://readthedocs.org/projects/objgraph/?badge=latest
+   :alt: Documentation Status
 
 
 ``objgraph`` is a module that lets you visually explore Python object graphs.
@@ -55,5 +65,3 @@ https://github.com/mgedmin/objgraph.
 To check it out, use ``git clone https://github.com/mgedmin/objgraph``.
 
 Report bugs at https://github.com/mgedmin/objgraph/issues.
-
-If you want to leave a tip, see https://www.gittip.com/mgedmin/

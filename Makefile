@@ -8,12 +8,12 @@ VCS_DIFF_IMAGES = git diff docs/*.png
 VCS_TAG = git tag
 VCS_COMMIT_AND_PUSH = git commit -av -m "Post-release version bump" && git push && git push --tags
 
-SUPPORTED_PYTHON_VERSIONS = 2.4 2.5 2.6 2.7 3.1 3.2 3.3 3.4
+SUPPORTED_PYTHON_VERSIONS = 2.7 3.3 3.4 3.5
 
-SPHINXOPTS    =
-SPHINXBUILD   = sphinx-build
-BUILDDIR      = docs/_build
-ALLSPHINXOPTS   = -d $(BUILDDIR)/doctrees $(SPHINXOPTS) docs/
+SPHINXOPTS      =
+SPHINXBUILD     = sphinx-build
+SPHINXBUILDDIR  = docs/_build
+ALLSPHINXOPTS   = -d $(SPHINXBUILDDIR)/doctrees $(SPHINXOPTS) docs/
 
 
 .PHONY: default
@@ -26,13 +26,13 @@ images:
 
 .PHONY: docs
 docs:
-	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
+	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(SPHINXBUILDDIR)/html
 	@echo
-	@echo "Now look at $(BUILDDIR)/html/index.html"
+	@echo "Now look at $(SPHINXBUILDDIR)/html/index.html"
 
 .PHONY: clean
 clean:
-	-rm -rf $(BUILDDIR)/*
+	-rm -rf $(SPHINXBUILDDIR)/* build
 
 .PHONY: test check
 test check:
@@ -58,12 +58,18 @@ preview-pypi-description:
 
 .PHONY: coverage
 coverage:
-	PYTHONPATH=.:$$PYTHONPATH coverage run --source=objgraph tests.py
+	coverage run --source=objgraph tests.py
+	python3 -m coverage run -a --source=objgraph tests.py
 	coverage report
+
+.PHONY: lint
+lint:
+	flake8 --exclude=build,docs/conf.py --ignore=E226
+	flake8 --exclude=build,docs/conf.py --doctests --ignore=E226,F821
 
 .PHONY: dist
 dist:
-	$(PYTHON) setup.py sdist
+	$(PYTHON) setup.py -q sdist
 
 .PHONY: distcheck
 distcheck:
@@ -125,7 +131,7 @@ release: releasechecklist config-imgdiff
 	@echo
 	@echo "then either revert or commit the new images and run"
 	@echo
-	@echo "  $(PYTHON) setup.py sdist register upload --unicode-description && $(VCS_TAG) `$(PYTHON) setup.py --version`"
+	@echo "  rm -rf dist && $(PYTHON) setup.py sdist bdist_wheel && twine upload dist/* && $(VCS_TAG) `$(PYTHON) setup.py --version`"
 	@echo "  make publish-docs"
 	@echo
 	@echo "Please increment the version number in $(FILE_WITH_VERSION)"
@@ -140,7 +146,7 @@ publish-docs:
 	    echo "There's no ~/www/objgraph, do you have the website checked out?"; exit 1; }
 	make clean docs
 	cp -r docs/_build/html/* ~/www/objgraph/
-	svn add ~/www/objgraph/*.html ~/www/objgraph/_images/*.png ~/www/objgraph/_sources/* ~/www/objgraph/_static/* 2>/dev/null
+	-svn add ~/www/objgraph/*.html ~/www/objgraph/_images/*.png ~/www/objgraph/_sources/* ~/www/objgraph/_static/* 2>/dev/null
 	svn st ~/www/objgraph/
 	@echo
 	@echo "If everything looks fine, please run"

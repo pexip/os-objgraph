@@ -1,6 +1,6 @@
 Metadata-Version: 1.1
 Name: objgraph
-Version: 1.8.1
+Version: 3.0.1
 Summary: Draws Python object reference graphs with graphviz
 Home-page: http://mg.pov.lt/objgraph/
 Author: Marius Gedminas
@@ -9,11 +9,21 @@ License: MIT
 Description: Python Object Graphs
         ====================
         
-        .. image:: https://travis-ci.org/mgedmin/objgraph.png?branch=master
+        .. image:: https://travis-ci.org/mgedmin/objgraph.svg?branch=master
            :target: https://travis-ci.org/mgedmin/objgraph
+           :alt: Build Status
         
-        .. image:: https://coveralls.io/repos/mgedmin/objgraph/badge.png?branch=master
+        .. image:: https://ci.appveyor.com/api/projects/status/github/mgedmin/objgraph?branch=master&svg=true
+           :target: https://ci.appveyor.com/project/mgedmin/objgraph
+           :alt: Build Status (Windows)
+        
+        .. image:: https://coveralls.io/repos/mgedmin/objgraph/badge.svg?branch=master
            :target: https://coveralls.io/r/mgedmin/objgraph?branch=master
+           :alt: Test Coverage
+        
+        .. image:: https://readthedocs.org/projects/objgraph/badge/?version=latest
+           :target: https://readthedocs.org/projects/objgraph/?badge=latest
+           :alt: Documentation Status
         
         
         ``objgraph`` is a module that lets you visually explore Python object graphs.
@@ -64,13 +74,72 @@ Description: Python Object Graphs
         
         Report bugs at https://github.com/mgedmin/objgraph/issues.
         
-        If you want to leave a tip, see https://www.gittip.com/mgedmin/
-        
         
         
         Changes
         =======
         
+        
+        
+        3.0.1 (2016-09-17)
+        ------------------
+        
+        - The ``file`` argument of `show_most_common_types` and
+          `show_growth` now defaults to ``None`` instead of ``sys.stdout``.
+          ``None`` is interpreted to be the same as ``sys.stdout``, which means
+          the right stdout will be used if you change it at runtime (which happens,
+          in doctests).
+        
+        
+        3.0.0 (2016-04-13)
+        ------------------
+        
+        - `show_most_common_types` and `show_growth` now accept a ``file``
+          argument if you want to redirect the output elsewhere.
+        
+          Fixes `issue 24 <https://github.com/mgedmin/objgraph/pull/24>`_.  Contributed
+          by "d-sun-d".
+        
+        - Don't trust ``__class__`` to be accurate and ``__name__`` to be a string.
+          Fixes errors in some convoluted corner cases when mocks are involved.
+        
+          Contributed by Andrew Shannon Brown in `PR 26
+          <https://github.com/mgedmin/objgraph/pull/26>`_.
+        
+        - Drop support for Python 2.4, 2.5, and 2.6.
+        
+        - Drop support for Python 3.1 and 3.2.
+        
+        - Add support for Python 3.5.
+        
+        
+        2.0.1 (2015-07-28)
+        ------------------
+        
+        - Avoid creating reference cycles between the stack frame and the local
+          ``objects`` variable in `by_type`, `count`, and
+          `typestats`.
+        
+          Fixes `issue 22 <https://github.com/mgedmin/objgraph/pull/22>`_.  Contributed
+          by Erik Bray.
+        
+        
+        2.0.0 (2015-04-18)
+        ------------------
+        
+        - `show_refs` and `show_backrefs` now accept a file-like object
+          (via the new ``output`` argument) as an alternative to a filename.
+        
+        - Made internal helper methods private. This includes `find_chain`,
+          `show_graph`, `obj_node_id`, `obj_label`, `quote`,
+          `long_typename`, `safe_repr`, `short_repr`, 
+          `gradient`, `edge_label`, and `_program_in_path`.
+        
+        - Correctly determine the name of old-style classes in `count`,
+          `by_type`, and graph drawing functions.
+        
+          Fixes `issue 16 <https://github.com/mgedmin/objgraph/pull/16>`_.  Contributed
+          by Mike Lambert.
         
         
         1.8.1 (2014-05-15)
@@ -279,12 +348,8 @@ Classifier: License :: OSI Approved :: MIT License
 Classifier: Operating System :: OS Independent
 Classifier: Programming Language :: Python
 Classifier: Programming Language :: Python :: 2
-Classifier: Programming Language :: Python :: 2.4
-Classifier: Programming Language :: Python :: 2.5
-Classifier: Programming Language :: Python :: 2.6
 Classifier: Programming Language :: Python :: 2.7
 Classifier: Programming Language :: Python :: 3
-Classifier: Programming Language :: Python :: 3.1
-Classifier: Programming Language :: Python :: 3.2
 Classifier: Programming Language :: Python :: 3.3
 Classifier: Programming Language :: Python :: 3.4
+Classifier: Programming Language :: Python :: 3.5
