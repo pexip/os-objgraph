@@ -1,3 +1,9 @@
+objgraph (1.8.1-1pexip2) pexip; urgency=low
+
+  * Resync with Debian
+
+ -- John-Mark Bell <jmb@pexip.com>  Mon, 17 Apr 2017 12:42:05 +0000
+
 objgraph (1.8.1-1pexip1) pexip; urgency=low
 
   * Prepare Pexip packaging
