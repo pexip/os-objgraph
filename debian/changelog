@@ -1,7 +1,6 @@
 objgraph (1.8.1-1pexip1) pexip; urgency=low
 
   * Prepare Pexip packaging
-  * Back out pybuild support: our python3 is too old for dh-python.
 
  -- John-Mark Bell <jmb@pexip.com>  Mon, 14 Jul 2014 13:53:37 +0000
 
