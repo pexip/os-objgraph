@@ -1,14 +1,19 @@
 language: python
+sudo: false
 python:
-    - 2.6
     - 2.7
-    - 3.2
     - 3.3
     - 3.4
+    - 3.5
+    - nightly
+addons:
+  apt:
+    packages:
+      - graphviz
 install:
-    - sudo apt-get install graphviz
-    - pip install coverage coveralls
-    - pip install -e .
+    - pip install coverage coveralls flake8 -e .
+before_script:
+    - make lint
 script:
     - coverage run --source=objgraph tests.py
 after_success:
