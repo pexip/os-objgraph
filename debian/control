@@ -20,7 +20,7 @@ Vcs-Browser: http://anonscm.debian.org/viewvc/python-modules/packages/objgraph/t
 X-Python-Version: >= 2.4
 X-Python3-Version: >= 3.0
 XS-Testsuite: autopkgtest
-XS-Pexip-Upstream: http://ftp.debian.org/debian/ jessie
+XS-Pexip-Upstream: http://ftp.debian.org/debian/ stretch
 
 Package: python-objgraph
 Architecture: all
