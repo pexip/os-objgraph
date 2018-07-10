@@ -1,3 +1,9 @@
+objgraph (3.0.1-1pexip1) pexip; urgency=medium
+
+  * Migrate to Stretch
+
+ -- John-Mark Bell <jmb@pexip.com>  Tue, 10 Jul 2018 11:34:41 +0000
+
 objgraph (3.0.1-1) unstable; urgency=medium
 
   * New upstream release.
