@@ -1,0 +1,11 @@
+# see git-dpm(1) from git-dpm package
+d665d2817650b1448adacf07cfe314266b142fe5
+d665d2817650b1448adacf07cfe314266b142fe5
+789cb4c30b3d8f2d101e4b00d48369780c8d24ec
+789cb4c30b3d8f2d101e4b00d48369780c8d24ec
+objgraph_3.0.1.orig.tar.gz
+17c4dc8b5f339c1138b844ad6908d256f074ef5d
+628566
+debianTag="debian/%e%v"
+patchedTag="patched/%e%v"
+upstreamTag="upstream/%e%u"

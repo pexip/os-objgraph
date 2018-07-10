@@ -9,4 +9,7 @@ include docs/conf.py
 include docs/_static/*.css
 include .gitignore
 include .gitattributes
-include .travis.yml
+include *.yml
+
+# added by check_manifest.py
+include *.txt

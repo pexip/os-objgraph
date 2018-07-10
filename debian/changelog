@@ -1,3 +1,43 @@
+objgraph (3.0.1-1) unstable; urgency=medium
+
+  * New upstream release.
+
+ -- Stefano Rivera <stefanor@debian.org>  Thu, 10 Nov 2016 12:26:04 +0000
+
+objgraph (3.0.0-1) unstable; urgency=medium
+
+  [ Stefano Rivera ]
+  * New upstream release
+  * Switch watch file to https.
+  * Bump copyright years.
+  * Bump Standards-Version to 3.9.8, no changes needed.
+  * Upstream dropped support for Python << 2.7 & << 3.3.
+  * Build-Depend on python{3,}-mock for unittests. (This is available in
+    stdlib for Python 3, but setup.py declares a dependency)
+
+  [ Ondřej Nový ]
+  * Fixed VCS URL (https)
+
+ -- Stefano Rivera <stefanor@debian.org>  Sun, 08 May 2016 22:15:20 +0200
+
+objgraph (2.0.1-1) unstable; urgency=medium
+
+  * New upstream release.
+  * Refresh patches.
+
+ -- Stefano Rivera <stefanor@debian.org>  Sun, 20 Sep 2015 18:14:39 -0700
+
+objgraph (2.0.0-1) unstable; urgency=medium
+
+  * New upstream release.
+  * Refresh patches.
+  * Point watch file to pypi.debian.net.
+  * Remove now-unnecessary XS-Testsuite control field.
+  * Bump Standards-Version to 3.9.6, no changes needed.
+  * Bump copyright years.
+
+ -- Stefano Rivera <stefanor@debian.org>  Fri, 03 Jul 2015 17:34:19 -0700
+
 objgraph (1.8.1-1pexip2) pexip; urgency=low
 
   * Resync with Debian

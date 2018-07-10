@@ -6,7 +6,10 @@ HACKING.rst
 MANIFEST.in
 Makefile
 README.rst
+appveyor.yml
 objgraph.py
+other-requirements.txt
+setup.cfg
 setup.py
 tests.py
 tox.ini
@@ -41,4 +44,5 @@ docs/_static/mg.css
 objgraph.egg-info/PKG-INFO
 objgraph.egg-info/SOURCES.txt
 objgraph.egg-info/dependency_links.txt
+objgraph.egg-info/pbr.json
 objgraph.egg-info/top_level.txt
