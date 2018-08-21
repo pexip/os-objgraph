@@ -2,13 +2,10 @@ PYTHON = python
 
 FILE_WITH_VERSION = objgraph.py
 FILE_WITH_CHANGELOG = CHANGES.rst
-VCS_STATUS = git status --porcelain
-VCS_EXPORT = git archive --format=tar --prefix=tmp/tree/ HEAD | tar -xf -
-VCS_DIFF_IMAGES = git diff docs/*.png
-VCS_TAG = git tag
-VCS_COMMIT_AND_PUSH = git commit -av -m "Post-release version bump" && git push && git push --tags
 
-SUPPORTED_PYTHON_VERSIONS = 2.7 3.3 3.4 3.5
+VCS_DIFF_IMAGES = git diff docs/*.png
+
+SUPPORTED_PYTHON_VERSIONS = 2.7 3.3 3.4 3.5 3.6
 
 SPHINXOPTS      =
 SPHINXBUILD     = sphinx-build
@@ -34,9 +31,12 @@ docs:
 clean:
 	-rm -rf $(SPHINXBUILDDIR)/* build
 
-.PHONY: test check
-test check:
+.PHONY: test
+test:
 	$(PYTHON) tests.py
+
+.PHONY:
+check: coverage
 
 .PHONY: test-all-pythons
 test-all-pythons:
@@ -54,59 +54,18 @@ test-all-pythons:
 .PHONY: preview-pypi-description
 preview-pypi-description:
 	# pip install restview, if missing
-	restview -e "$(PYTHON) setup.py --long-description"
+	restview --long-description
 
 .PHONY: coverage
 coverage:
 	coverage run --source=objgraph tests.py
 	python3 -m coverage run -a --source=objgraph tests.py
-	coverage report
+	coverage report -m --fail-under=100
 
 .PHONY: lint
 lint:
 	flake8 --exclude=build,docs/conf.py --ignore=E226
 	flake8 --exclude=build,docs/conf.py --doctests --ignore=E226,F821
-
-.PHONY: dist
-dist:
-	$(PYTHON) setup.py -q sdist
-
-.PHONY: distcheck
-distcheck:
-	# Bit of a chicken-and-egg here, but if the tree is unclean, make
-	# distcheck will fail.
-	@test -z "`$(VCS_STATUS) 2>&1`" || { echo; echo "Your working tree is not clean" 1>&2; $(VCS_STATUS); exit 1; }
-	make dist
-	pkg_and_version=`$(PYTHON) setup.py --name`-`$(PYTHON) setup.py --version` && \
-	rm -rf tmp && \
-	mkdir tmp && \
-	$(VCS_EXPORT) && \
-	cd tmp && \
-	tar xvzf ../dist/$$pkg_and_version.tar.gz && \
-	diff -ur $$pkg_and_version tree -x PKG-INFO -x setup.cfg -x '*.egg-info' && \
-	cd $$pkg_and_version && \
-	make dist check && \
-	cd .. && \
-	mkdir one two && \
-	cd one && \
-	tar xvzf ../../dist/$$pkg_and_version.tar.gz && \
-	cd ../two/ && \
-	tar xvzf ../$$pkg_and_version/dist/$$pkg_and_version.tar.gz && \
-	cd .. && \
-	diff -ur one two -x SOURCES.txt && \
-	cd .. && \
-	rm -rf tmp && \
-	echo "sdist seems to be ok"
-
-.PHONY: releasechecklist
-releasechecklist:
-	@$(PYTHON) setup.py --version | grep -qv dev || { \
-	    echo "Please remove the 'dev' suffix from the version number in $(FILE_WITH_VERSION)"; exit 1; }
-	@$(PYTHON) setup.py --long-description | rst2html --exit-status=2 > /dev/null
-	@ver_and_date="`$(PYTHON) setup.py --version` (`date +%Y-%m-%d`)" && \
-	    grep -q "^$$ver_and_date$$" $(FILE_WITH_CHANGELOG) || { \
-	        echo "$(FILE_WITH_CHANGELOG) has no entry for $$ver_and_date"; exit 1; }
-	make distcheck
 
 # Make sure $(VCS_DIFF_IMAGES) can work
 .PHONY: config-imgdiff
@@ -117,8 +76,28 @@ config-imgdiff:
 imgdiff: config-imgdiff
 	$(VCS_DIFF_IMAGES)
 
-.PHONY: release
-release: releasechecklist config-imgdiff
+
+.PHONY: releasechecklist
+releasechecklist: check-date  # also release.mk will add other checks
+
+include release.mk
+
+.PHONY: check-date
+check-date:
+	@date_line="__date__ = '`date +%Y-%m-%d`'" && \
+	    grep -q "^$$date_line$$" $(FILE_WITH_VERSION) || { \
+	        echo "$(FILE_WITH_VERSION) doesn't specify $$date_line"; \
+	        echo "Please run make update-date"; exit 1; }
+
+.PHONY: update-date
+update-date:
+	sed -i -e "s/^__date__ = '.*'/__date__ = '`date +%Y-%m-%d`'/" $(FILE_WITH_VERSION)
+
+
+.PHONY: do-release
+do-release: config-imgdiff
+
+define release_recipe =
 	# I'm chicken so I won't actually do these things yet
 	@echo "It is a good idea to run"
 	@echo
@@ -127,11 +106,12 @@ release: releasechecklist config-imgdiff
 	@echo
 	@echo "about now.  Then sanity-check the images with"
 	@echo
-	@echo "  $(VCS_DIFF_IMAGES)"
+	@echo "  make imgdiff"
 	@echo
 	@echo "then either revert or commit the new images and run"
 	@echo
-	@echo "  rm -rf dist && $(PYTHON) setup.py sdist bdist_wheel && twine upload dist/* && $(VCS_TAG) `$(PYTHON) setup.py --version`"
+	@echo "  $(PYPI_PUBLISH)"
+	@echo "  $(VCS_TAG)"
 	@echo "  make publish-docs"
 	@echo
 	@echo "Please increment the version number in $(FILE_WITH_VERSION)"
@@ -139,6 +119,7 @@ release: releasechecklist config-imgdiff
 	@echo
 	@echo '  $(VCS_COMMIT_AND_PUSH)'
 	@echo
+endef
 
 .PHONY: publish-docs
 publish-docs:
@@ -146,11 +127,11 @@ publish-docs:
 	    echo "There's no ~/www/objgraph, do you have the website checked out?"; exit 1; }
 	make clean docs
 	cp -r docs/_build/html/* ~/www/objgraph/
-	-svn add ~/www/objgraph/*.html ~/www/objgraph/_images/*.png ~/www/objgraph/_sources/* ~/www/objgraph/_static/* 2>/dev/null
-	svn st ~/www/objgraph/
+	cd ~/www/objgraph && git add . && git status
 	@echo
 	@echo "If everything looks fine, please run"
 	@echo
-	@echo "  svn ci ~/www/objgraph/ -m \"Released objgraph `$(PYTHON) setup.py --version`\""
+	@echo "  cd ~/www/ && git commit -m \"Released objgraph `$(PYTHON) setup.py --version`\" && git push"
+	@echo "  ssh fridge 'cd www && git pull'"
 	@echo
 

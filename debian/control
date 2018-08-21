@@ -4,22 +4,21 @@ Priority: optional
 Maintainer: Debian Python Modules Team <python-modules-team@lists.alioth.debian.org>
 Uploaders: Stefano Rivera <stefanor@debian.org>
 Build-Depends:
- debhelper (>= 9),
+ debhelper (>= 11),
  dh-python,
  graphviz,
  python-all (>= 2.7),
  python-mock,
  python-setuptools,
- python-sphinx (>= 1.0.7+dfsg),
+ python3-sphinx (>= 1.0.7+dfsg),
  python3-all (>= 3.3),
  python3-mock,
  python3-setuptools
-Standards-Version: 3.9.8
-Homepage: http://mg.pov.lt/objgraph/
-Vcs-Git: https://anonscm.debian.org/git/python-modules/packages/objgraph.git
-Vcs-Browser: https://anonscm.debian.org/cgit/python-modules/packages/objgraph.git
-X-Python-Version: >= 2.7
-X-Python3-Version: >= 3.3
+Standards-Version: 4.2.0
+Homepage: https://mg.pov.lt/objgraph/
+Vcs-Git: https://salsa.debian.org/python-team/modules/objgraph.git
+Vcs-Browser: https://salsa.debian.org/python-team/modules/objgraph
+Rules-Requires-Root: no
 
 Package: python-objgraph
 Architecture: all
@@ -53,8 +52,6 @@ Package: python-objgraph-doc
 Architecture: all
 Section: doc
 Depends: ${misc:Depends}, ${sphinxdoc:Depends}
-Replaces: python-objgraph (<< 1.6.0-2), python3-objgraph (<< 1.6.0-2)
-Breaks: python-objgraph (<< 1.6.0-2), python3-objgraph (<< 1.6.0-2)
 Recommends: graphviz
 Suggests: xdot
 Description: Module for exploring Python object reference graphs (Documentation)

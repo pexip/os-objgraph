@@ -1,3 +1,39 @@
+objgraph (3.4.0-2) unstable; urgency=medium
+
+  [ Ondřej Nový ]
+  * d/tests: Use AUTOPKGTEST_TMP instead of ADTTMP
+  * d/control: Remove ancient X-Python-Version field
+  * d/control: Remove ancient X-Python3-Version field
+
+  [ Stefano Rivera ]
+  * Switch homepage URL to https.
+  * Bump Standards-Version to 4.2.0, no changes needed.
+
+ -- Stefano Rivera <stefanor@debian.org>  Tue, 21 Aug 2018 09:50:20 -0700
+
+objgraph (3.4.0-1) unstable; urgency=medium
+
+  [ Stefano Rivera ]
+  * New upstream release.
+  * Refresh patches.
+  * Bump copyright years.
+  * Bump Standards-Version to 4.1.3, no changes needed.
+  * Drop Breaks + Replaces on objgraph (<< 1.6.0-2), that's not in any
+    supported release any more.
+  * Use python3-sphinx rather than the Python 2 version.
+  * Bump debhelper compat to 11.
+    - Override dh_installdocs package heuristics.
+  * Drop overrides for things that debhelper now supports.
+  * Patch: Drop graphviz from install_requires, not packaged in Debian and not
+    needed.
+  * Set Rules-Requires-Root: no
+
+  [ Ondřej Nový ]
+  * d/control: Set Vcs-* to salsa.debian.org
+  * d/copyright: Use https protocol in Format field
+
+ -- Stefano Rivera <stefanor@debian.org>  Sun, 18 Feb 2018 19:30:34 -0800
+
 objgraph (3.0.1-1) unstable; urgency=medium
 
   * New upstream release.
