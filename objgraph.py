@@ -1,9 +1,9 @@
 """
 Tools for drawing Python object reference graphs with graphviz.
 
-You can find documentation online at http://mg.pov.lt/objgraph/
+You can find documentation online at https://mg.pov.lt/objgraph/
 
-Copyright (c) 2008-2016 Marius Gedminas <marius@pov.lt> and contributors
+Copyright (c) 2008-2017 Marius Gedminas <marius@pov.lt> and contributors
 
 Released under the MIT licence.
 """
@@ -25,8 +25,10 @@ Released under the MIT licence.
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
+from __future__ import print_function
 
 import codecs
+import collections
 import gc
 import re
 import inspect
@@ -39,6 +41,12 @@ import sys
 import itertools
 
 try:
+    # Python 2.x compatibility
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
+
+try:
     from types import InstanceType
 except ImportError:
     # Python 3.x compatibility
@@ -46,10 +54,10 @@ except ImportError:
 
 
 __author__ = "Marius Gedminas (marius@gedmin.as)"
-__copyright__ = "Copyright (c) 2008-2016 Marius Gedminas and contributors"
+__copyright__ = "Copyright (c) 2008-2017 Marius Gedminas and contributors"
 __license__ = "MIT"
-__version__ = "3.0.1"
-__date__ = "2016-09-17"
+__version__ = '3.4.0'
+__date__ = '2018-02-13'
 
 
 try:
@@ -63,6 +71,14 @@ try:
 except AttributeError:
     # Python 3.x compatibility
     iteritems = dict.items
+
+IS_INTERACTIVE = False
+try:  # pragma: nocover
+    import graphviz
+    if get_ipython().__class__.__name__ != 'TerminalInteractiveShell':
+        IS_INTERACTIVE = True
+except (NameError, ImportError):
+    pass
 
 
 def _isinstance(object, classinfo):
@@ -121,13 +137,17 @@ def count(typename, objects=None):
         del objects  # clear cyclic references to frame
 
 
-def typestats(objects=None, shortnames=True):
+def typestats(objects=None, shortnames=True, filter=None):
     """Count the number of instances for each type tracked by the GC.
 
     Note that the GC does not track simple objects like int or str.
 
     Note that classes with the same name but defined in different modules
     will be lumped together if ``shortnames`` is True.
+
+    If ``filter`` is specified, it should be a function taking one argument and
+    returning a boolean. Objects for which ``filter(obj)`` returns ``False``
+    will be ignored.
 
     Example:
 
@@ -144,6 +164,9 @@ def typestats(objects=None, shortnames=True):
     .. versionchanged:: 1.8
        New parameter: ``shortnames``.
 
+    .. versionchanged:: 3.1.3
+       New parameter: ``filter``.
+
     """
     if objects is None:
         objects = gc.get_objects()
@@ -154,6 +177,8 @@ def typestats(objects=None, shortnames=True):
             typename = _long_typename
         stats = {}
         for o in objects:
+            if filter and not filter(o):
+                continue
             n = typename(o)
             stats[n] = stats.get(n, 0) + 1
         return stats
@@ -161,13 +186,17 @@ def typestats(objects=None, shortnames=True):
         del objects  # clear cyclic references to frame
 
 
-def most_common_types(limit=10, objects=None, shortnames=True):
+def most_common_types(limit=10, objects=None, shortnames=True, filter=None):
     """Count the names of types with the most instances.
 
     Returns a list of (type_name, count), sorted most-frequent-first.
 
     Limits the return value to at most ``limit`` items.  You may set ``limit``
     to None to avoid that.
+
+    If ``filter`` is specified, it should be a function taking one argument and
+    returning a boolean. Objects for which ``filter(obj)`` returns ``False``
+    will be ignored.
 
     The caveats documented in :func:`typestats` apply.
 
@@ -184,9 +213,13 @@ def most_common_types(limit=10, objects=None, shortnames=True):
     .. versionchanged:: 1.8
        New parameter: ``shortnames``.
 
+    .. versionchanged:: 3.1.3
+       New parameter: ``filter``.
+
     """
-    stats = sorted(typestats(objects, shortnames=shortnames).items(),
-                   key=operator.itemgetter(1), reverse=True)
+    stats = sorted(
+        typestats(objects, shortnames=shortnames, filter=filter).items(),
+        key=operator.itemgetter(1), reverse=True)
     if limit:
         stats = stats[:limit]
     return stats
@@ -196,8 +229,13 @@ def show_most_common_types(
         limit=10,
         objects=None,
         shortnames=True,
-        file=None):
+        file=None,
+        filter=None):
     """Print the table of types of most common instances.
+
+    If ``filter`` is specified, it should be a function taking one argument and
+    returning a boolean. Objects for which ``filter(obj)`` returns ``False``
+    will be ignored.
 
     The caveats documented in :func:`typestats` apply.
 
@@ -221,17 +259,24 @@ def show_most_common_types(
     .. versionchanged:: 3.0
        New parameter: ``file``.
 
+    .. versionchanged:: 3.1.3
+       New parameter: ``filter``.
+
     """
     if file is None:
         file = sys.stdout
-    stats = most_common_types(limit, objects, shortnames=shortnames)
+    stats = most_common_types(limit, objects, shortnames=shortnames,
+                              filter=filter)
     width = max(len(name) for name, count in stats)
     for name, count in stats:
         file.write('%-*s %i\n' % (width, name, count))
 
 
-def show_growth(limit=10, peak_stats={}, shortnames=True, file=None):
-    """Show the increase in peak object counts since last call.
+def growth(limit=10, peak_stats={}, shortnames=True, filter=None):
+    """Count the increase in peak object since last call.
+
+    Returns a list of (type_name, total_count, increase_delta),
+    descending order by increase_delta.
 
     Limits the output to ``limit`` largest deltas.  You may set ``limit`` to
     None to see all of them.
@@ -240,7 +285,45 @@ def show_growth(limit=10, peak_stats={}, shortnames=True, file=None):
     seen peak object counts.  Usually you don't need to pay attention to this
     argument.
 
+    If ``filter`` is specified, it should be a function taking one argument and
+    returning a boolean. Objects for which ``filter(obj)`` returns ``False``
+    will be ignored.
+
     The caveats documented in :func:`typestats` apply.
+
+    Example:
+
+        >>> growth(2)
+        [(tuple, 12282, 10), (dict, 1922, 7)]
+
+    .. versionadded:: 3.3.0
+
+    """
+    gc.collect()
+    stats = typestats(shortnames=shortnames, filter=filter)
+    deltas = {}
+    for name, count in iteritems(stats):
+        old_count = peak_stats.get(name, 0)
+        if count > old_count:
+            deltas[name] = count - old_count
+            peak_stats[name] = count
+    deltas = sorted(deltas.items(), key=operator.itemgetter(1),
+                    reverse=True)
+    if limit:
+        deltas = deltas[:limit]
+
+    return [(name, stats[name], delta) for name, delta in deltas]
+
+
+def show_growth(limit=10, peak_stats=None, shortnames=True, file=None,
+                filter=None):
+    """Show the increase in peak object counts since last call.
+
+    if ``peak_stats`` is None, peak object counts will recorded in
+    func `growth`, and your can record the counts by yourself with set
+    ``peak_stats`` to a dictionary.
+
+    The caveats documented in :func:`growth` apply.
 
     Example:
 
@@ -258,25 +341,153 @@ def show_growth(limit=10, peak_stats={}, shortnames=True, file=None):
     .. versionchanged:: 2.1
        New parameter: ``file``.
 
+    .. versionchanged:: 3.1.3
+       New parameter: ``filter``.
+
     """
-    gc.collect()
-    stats = typestats(shortnames=shortnames)
-    deltas = {}
-    for name, count in iteritems(stats):
-        old_count = peak_stats.get(name, 0)
-        if count > old_count:
-            deltas[name] = count - old_count
-            peak_stats[name] = count
-    deltas = sorted(deltas.items(), key=operator.itemgetter(1),
-                    reverse=True)
-    if limit:
-        deltas = deltas[:limit]
-    if deltas:
+    if peak_stats is None:
+        result = growth(limit, shortnames=shortnames, filter=filter)
+    else:
+        result = growth(limit, peak_stats, shortnames, filter)
+    if result:
         if file is None:
             file = sys.stdout
-        width = max(len(name) for name, count in deltas)
-        for name, delta in deltas:
-            file.write('%-*s%9d %+9d\n' % (width, name, stats[name], delta))
+        width = max(len(name) for name, _, _ in result)
+        for name, count, delta in result:
+            file.write('%-*s%9d %+9d\n' % (width, name, count, delta))
+
+
+def get_new_ids(skip_update=False, limit=10, sortby='deltas',
+                shortnames=None, file=None, _state={}):
+    """Find and display new objects allocated since last call.
+
+    Shows the increase in object counts since last call to this
+    function and returns the memory address ids for new objects.
+
+    Returns a dictionary mapping object type names to sets of object IDs
+    that have been created since the last time this function was called.
+
+    ``skip_update`` (bool): If True, returns the same dictionary that
+    was returned during the previous call without updating the internal
+    state or examining the objects currently in memory.
+
+    ``limit`` (int): The maximum number of rows that you want to print
+    data for.  Use 0 to suppress the printing.  Use None to print everything.
+
+    ``sortby`` (str): This is the column that you want to sort by in
+    descending order.  Possible values are: 'old', 'current', 'new',
+    'deltas'
+
+    ``shortnames`` (bool): If True, classes with the same name but
+    defined in different modules will be lumped together.  If False,
+    all type names will be qualified with the module name.  If None (default),
+    ``get_new_ids`` will remember the value from previous calls, so it's
+    enough to prime this once.  By default the primed value is True.
+
+    ``_state`` (dict): Stores old, current, and new_ids in memory.
+    It is used by the function to store the internal state between calls.
+    Never pass in this argument unless you know what you're doing.
+
+    The caveats documented in :func:`growth` apply.
+
+    When one gets new_ids from :func:`get_new_ids`, one can use
+    :func:`at_addrs` to get a list of those objects. Then one can iterate over
+    the new objects, print out what they are, and call :func:`show_backrefs` or
+    :func:`show_chain` to see where they are referenced.
+
+    Example:
+
+        >>> _ = get_new_ids() # store current objects in _state
+        >>> _ = get_new_ids() # current_ids become old_ids in _state
+        >>> a = [0, 1, 2] # list we don't know about
+        >>> b = [3, 4, 5] # list we don't know about
+        >>> new_ids = get_new_ids(limit=3) # we see new lists
+        ======================================================================
+        Type                    Old_ids  Current_ids      New_ids Count_Deltas
+        ======================================================================
+        list                        324          326           +3           +2
+        dict                       1125         1125           +0           +0
+        wrapper_descriptor         1001         1001           +0           +0
+        ======================================================================
+        >>> new_lists = at_addrs(new_ids['list'])
+        >>> a in new_lists
+        True
+        >>> b in new_lists
+        True
+
+    .. versionadded:: 3.4
+    """
+    if not _state:
+        _state['old'] = collections.defaultdict(set)
+        _state['current'] = collections.defaultdict(set)
+        _state['new'] = collections.defaultdict(set)
+        _state['shortnames'] = True
+    new_ids = _state['new']
+    if skip_update:
+        return new_ids
+    old_ids = _state['old']
+    current_ids = _state['current']
+    if shortnames is None:
+        shortnames = _state['shortnames']
+    else:
+        _state['shortnames'] = shortnames
+    gc.collect()
+    objects = gc.get_objects()
+    for class_name in old_ids:
+        old_ids[class_name].clear()
+    for class_name, ids_set in current_ids.items():
+        old_ids[class_name].update(ids_set)
+    for class_name in current_ids:
+        current_ids[class_name].clear()
+    for o in objects:
+        if shortnames:
+            class_name = _short_typename(o)
+        else:
+            class_name = _long_typename(o)
+        id_number = id(o)
+        current_ids[class_name].add(id_number)
+    for class_name in new_ids:
+        new_ids[class_name].clear()
+    rows = []
+    keys_to_remove = []
+    for class_name in current_ids:
+        num_old = len(old_ids[class_name])
+        num_current = len(current_ids[class_name])
+        if num_old == 0 and num_current == 0:
+            # remove the key from our dicts if we don't have any old or
+            # current class_name objects
+            keys_to_remove.append(class_name)
+            continue
+        new_ids_set = current_ids[class_name] - old_ids[class_name]
+        new_ids[class_name].update(new_ids_set)
+        num_new = len(new_ids_set)
+        num_delta = num_current - num_old
+        row = (class_name, num_old, num_current, num_new, num_delta)
+        rows.append(row)
+    for key in keys_to_remove:
+        del old_ids[key]
+        del current_ids[key]
+        del new_ids[key]
+    index_by_sortby = {'old': 1, 'current': 2, 'new': 3, 'deltas': 4}
+    rows.sort(key=operator.itemgetter(index_by_sortby[sortby], 0),
+              reverse=True)
+    if limit is not None:
+        rows = rows[:limit]
+    if not rows:
+        return new_ids
+    if file is None:
+        file = sys.stdout
+    width = max(len(row[0]) for row in rows)
+    print('='*(width+13*4), file=file)
+    print('%-*s%13s%13s%13s%13s' %
+          (width, 'Type', 'Old_ids', 'Current_ids', 'New_ids', 'Count_Deltas'),
+          file=file)
+    print('='*(width+13*4), file=file)
+    for row_class, old, current, new, delta in rows:
+        print('%-*s%13d%13d%+13d%+13d' %
+              (width, row_class, old, current, new, delta), file=file)
+    print('='*(width+13*4), file=file)
+    return new_ids
 
 
 def get_leaking_objects(objects=None):
@@ -348,6 +559,35 @@ def at(addr):
     return None
 
 
+def at_addrs(address_set):
+    """Return a list of objects for a given set of memory addresses.
+
+    The reverse of [id(obj1), id(obj2), ...].  Note that objects are returned
+    in an arbitrary order.
+
+    When one gets ``new_ids`` from :func:`get_new_ids`, one can use this
+    function to get a list of those objects.  Then one can iterate over the new
+    objects, print out what they are, and call :func:`show_backrefs` or
+    :func:`show_chain` to see where they are referenced.
+
+        >>> a = [0, 1, 2]
+        >>> new_ids = get_new_ids()
+        >>> new_lists = at_addrs(new_ids['list'])
+        >>> a in new_lists
+        True
+
+    Note that this function does not work on objects that are not tracked
+    by the GC (e.g. ints or strings).
+
+    .. versionadded:: 3.4
+    """
+    res = []
+    for o in gc.get_objects():
+        if id(o) in address_set:
+            res.append(o)
+    return res
+
+
 def find_ref_chain(obj, predicate, max_depth=20, extra_ignore=()):
     """Find a shortest chain of references leading from obj.
 
@@ -415,8 +655,9 @@ def show_backrefs(objs, max_depth=3, extra_ignore=(), filter=None, too_many=10,
     file, whose extension indicates the desired output format; note
     that output to a specific format is entirely handled by GraphViz:
     if the desired format is not supported, you just get the .dot
-    file.  If ``filename`` and ``output`` is not specified, ``show_backrefs``
-    will try to produce a .dot file and spawn a viewer (xdot).  If xdot is
+    file.  If ``filename`` and ``output`` are not specified, ``show_backrefs``
+    will try to display the graph inline (if you're using IPython), otherwise
+    it'll try to produce a .dot file and spawn a viewer (xdot).  If xdot is
     not available, ``show_backrefs`` will convert the .dot file to a
     .png and print its name.
 
@@ -468,12 +709,12 @@ def show_backrefs(objs, max_depth=3, extra_ignore=(), filter=None, too_many=10,
     # module because you'll end up in sys.modules and explode the
     # graph with useless clutter.  That's why we're specifying
     # cull_func here, but not in show_graph().
-    _show_graph(objs, max_depth=max_depth, extra_ignore=extra_ignore,
-                filter=filter, too_many=too_many, highlight=highlight,
-                edge_func=gc.get_referrers, swap_source_target=False,
-                filename=filename, output=output, extra_info=extra_info,
-                refcounts=refcounts, shortnames=shortnames,
-                cull_func=is_proper_module)
+    return _show_graph(objs, max_depth=max_depth, extra_ignore=extra_ignore,
+                       filter=filter, too_many=too_many, highlight=highlight,
+                       edge_func=gc.get_referrers, swap_source_target=False,
+                       filename=filename, output=output, extra_info=extra_info,
+                       refcounts=refcounts, shortnames=shortnames,
+                       cull_func=is_proper_module)
 
 
 def show_refs(objs, max_depth=3, extra_ignore=(), filter=None, too_many=10,
@@ -492,6 +733,7 @@ def show_refs(objs, max_depth=3, extra_ignore=(), filter=None, too_many=10,
     that output to a specific format is entirely handled by GraphViz:
     if the desired format is not supported, you just get the .dot
     file.  If ``filename`` and ``output`` is not specified, ``show_refs`` will
+    try to display the graph inline (if you're using IPython), otherwise it'll
     try to produce a .dot file and spawn a viewer (xdot).  If xdot is
     not available, ``show_refs`` will convert the .dot file to a
     .png and print its name.
@@ -536,11 +778,12 @@ def show_refs(objs, max_depth=3, extra_ignore=(), filter=None, too_many=10,
     .. versionchanged:: 2.0
        New parameter: ``output``.
     """
-    _show_graph(objs, max_depth=max_depth, extra_ignore=extra_ignore,
-                filter=filter, too_many=too_many, highlight=highlight,
-                edge_func=gc.get_referents, swap_source_target=True,
-                filename=filename, extra_info=extra_info, refcounts=refcounts,
-                shortnames=shortnames, output=output)
+    return _show_graph(objs, max_depth=max_depth, extra_ignore=extra_ignore,
+                       filter=filter, too_many=too_many, highlight=highlight,
+                       edge_func=gc.get_referents, swap_source_target=True,
+                       filename=filename, extra_info=extra_info,
+                       refcounts=refcounts, shortnames=shortnames,
+                       output=output)
 
 
 def show_chain(*chains, **kw):
@@ -562,7 +805,7 @@ def show_chain(*chains, **kw):
     symmetrical.
 
     You can specify ``highlight``, ``extra_info``, ``refcounts``,
-    ``shortnames``,``filename`` or ``output`` arguments like for
+    ``shortnames``, ``filename`` or ``output`` arguments like for
     :func:`show_backrefs` or :func:`show_refs`.
 
     .. versionadded:: 1.5
@@ -654,6 +897,8 @@ def _show_graph(objs, edge_func, swap_source_target,
                 cull_func=None):
     if not _isinstance(objs, (list, tuple)):
         objs = [objs]
+
+    is_interactive = False
     if filename and output:
         raise ValueError('Cannot specify both output and filename.')
     elif output:
@@ -661,6 +906,9 @@ def _show_graph(objs, edge_func, swap_source_target,
     elif filename and filename.endswith('.dot'):
         f = codecs.open(filename, 'w', encoding='utf-8')
         dot_filename = filename
+    elif IS_INTERACTIVE:
+        is_interactive = True
+        f = StringIO()
     else:
         fd, dot_filename = tempfile.mkstemp(prefix='objgraph-',
                                             suffix='.dot', text=True)
@@ -767,13 +1015,18 @@ def _show_graph(objs, edge_func, swap_source_target,
             f.write('  too_many_%s[fontcolor=white];\n'
                     % (_obj_node_id(target)))
     f.write("}\n")
+
     if output:
         return
-    # The file should only be closed if this function was in charge of opening
-    # the file.
-    f.close()
-    print("Graph written to %s (%d nodes)" % (dot_filename, nodes))
-    _present_graph(dot_filename, filename)
+
+    if is_interactive:
+        return graphviz.Source(f.getvalue())
+    else:
+        # The file should only be closed if this function was in charge of
+        # opening the file.
+        f.close()
+        print("Graph written to %s (%d nodes)" % (dot_filename, nodes))
+        _present_graph(dot_filename, filename)
 
 
 def _present_graph(dot_filename, filename=None):
@@ -867,7 +1120,7 @@ def _long_typename(obj):
 def _safe_repr(obj):
     try:
         return _short_repr(obj)
-    except:
+    except Exception:
         return '(unrepresentable)'
 
 
@@ -893,6 +1146,10 @@ def _short_repr(obj):
             return name + ' (bound)'
         else:
             return name
+    # NB: types.LambdaType is an alias for types.FunctionType!
+    if _isinstance(obj, types.LambdaType) and obj.__name__ == '<lambda>':
+        return 'lambda: %s:%s' % (os.path.basename(obj.__code__.co_filename),
+                                  obj.__code__.co_firstlineno)
     if _isinstance(obj, types.FrameType):
         return '%s:%s' % (obj.f_code.co_filename, obj.f_lineno)
     if _isinstance(obj, (tuple, list, dict, set)):

@@ -11,3 +11,6 @@ __pycache__/
 .tox/
 .toxbox/
 *.py[co]
+.cache
+*.DS_Store
+venv/
