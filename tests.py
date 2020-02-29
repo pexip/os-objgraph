@@ -12,6 +12,12 @@ import textwrap
 import types
 import unittest
 
+# distutils imports `imp`, which triggers a DeprecationWarning starting with
+# Python 3.4 in the middle of my pristine test suite.  But if I do the import
+# upfront, there's no warning.  I cannot explain this, I'm just happy there's
+# no warning.
+import distutils  # noqa
+
 try:
     from unittest import mock
 except ImportError:
@@ -219,6 +225,14 @@ class ShowGraphTest(unittest.TestCase):
                                 label_a=label_a,
                                 label_b=label_b))
 
+    @mock.patch('objgraph.IS_INTERACTIVE', True)
+    @mock.patch('objgraph.graphviz', create=True)
+    def test_ipython(self, mock_graphviz):
+        mock_graphviz.Source = lambda x: x
+        res = objgraph._show_graph([TestObject.get("A")], edge_function(),
+                                   False)
+        self.assertTrue(res.startswith('digraph'))
+
 
 class FindChainTest(GarbageCollectedMixin, unittest.TestCase):
     """Tests for the find_chain function."""
@@ -244,9 +258,10 @@ class CountTest(GarbageCollectedMixin, unittest.TestCase):
         # count()
         gc.disable()
         x = type('MyClass', (), {})()
-        self.assertEqual(len(gc.get_referrers(x)), 1)
+        before = len(gc.get_referrers(x))
         objgraph.count('MyClass')
-        self.assertEqual(len(gc.get_referrers(x)), 1)
+        after = len(gc.get_referrers(x))
+        self.assertEqual(before, after)
 
 
 class TypestatsTest(GarbageCollectedMixin, unittest.TestCase):
@@ -262,9 +277,96 @@ class TypestatsTest(GarbageCollectedMixin, unittest.TestCase):
         # typestats()
         gc.disable()
         x = type('MyClass', (), {})()
-        self.assertEqual(len(gc.get_referrers(x)), 1)
+        before = len(gc.get_referrers(x))
         objgraph.typestats()
-        self.assertEqual(len(gc.get_referrers(x)), 1)
+        after = len(gc.get_referrers(x))
+        self.assertEqual(before, after)
+
+
+class TypestatsFilterArguTest(GarbageCollectedMixin, unittest.TestCase):
+    """Tests for the typestats function, especially for augument
+    ``filter`` which is added at version 3.1.3"""
+
+    def test_without_filter(self):
+        MyClass = type('MyClass', (), {'__module__': 'mymodule'})  # noqa
+        x, y = MyClass(), MyClass()
+        x.magic_attr = True
+        y.magic_attr = False
+        stats = objgraph.typestats(shortnames=False)
+        self.assertEqual(2, stats['mymodule.MyClass'])
+
+    def test_with_filter(self):
+        MyClass = type('MyClass', (), {'__module__': 'mymodule'})  # noqa
+        x, y = MyClass(), MyClass()
+        x.magic_attr = True
+        y.magic_attr = False
+        stats = objgraph.typestats(
+            shortnames=False,
+            filter=lambda e: isinstance(e, MyClass) and e.magic_attr)
+        self.assertEqual(1, stats['mymodule.MyClass'])
+
+
+class GrowthTest(GarbageCollectedMixin, unittest.TestCase):
+    """Tests for the growth function."""
+
+    def test_growth(self):
+        objgraph.growth(limit=None)
+        x = type('MyClass', (), {'__module__': 'mymodule'})()  # noqa
+        growth_info = objgraph.growth(limit=None)
+        cared = [record for record in growth_info if record[0] == 'MyClass']
+        self.assertEqual(1, len(cared))
+        self.assertEqual(1, cared[0][2])
+
+    def test_show_growth_custom_peak_stats(self):
+        ps = {}
+        objgraph.show_growth(peak_stats=ps, file=StringIO())
+        self.assertNotEqual(ps, {})
+
+
+class GetNewIdsTest(unittest.TestCase):
+
+    maxDiff = None
+
+    def setUp(self):
+        objgraph.get_new_ids(limit=0, shortnames=True)
+
+    def test_get_new_ids(self):
+        x = type('MyClass', (), {'__module__': 'mymodule'})()  # noqa
+        new_ids = objgraph.get_new_ids(limit=0)
+        self.assertIn(id(x), new_ids['MyClass'])
+        new_ids = objgraph.get_new_ids(limit=0)
+        self.assertNotIn(id(x), new_ids['MyClass'])
+
+    def test_get_new_ids_skip_update(self):
+        x = type('MyClass', (), {'__module__': 'mymodule'})()  # noqa
+        new_ids = objgraph.get_new_ids(limit=0)
+        self.assertIn(id(x), new_ids['MyClass'])
+        new_ids = objgraph.get_new_ids(skip_update=True, limit=0)
+        self.assertIn(id(x), new_ids['MyClass'])
+
+    def test_get_new_ids_long_typename(self):
+        objgraph.get_new_ids(limit=0, shortnames=False)
+        x = type('MyClass', (), {'__module__': 'mymodule'})()  # noqa
+        new_ids = objgraph.get_new_ids(limit=0)
+        self.assertIn(id(x), new_ids['mymodule.MyClass'])
+
+
+def doctest_get_new_ids_prints():
+    """Test for get_new_ids()
+
+        >>> _ = objgraph.get_new_ids(limit=0)
+        >>> _ = objgraph.get_new_ids(limit=0)
+        >>> a = [0, 1, 2]  # noqa
+        >>> b = [3, 4, 5]  # noqa
+        >>> _ = objgraph.get_new_ids(limit=1)
+        ... # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+        ========================================================
+        Type      Old_ids  Current_ids      New_ids Count_Deltas
+        ========================================================
+        list          ...          ...          ...           +2
+        ========================================================
+
+    """
 
 
 class ByTypeTest(GarbageCollectedMixin, unittest.TestCase):
@@ -281,11 +383,20 @@ class ByTypeTest(GarbageCollectedMixin, unittest.TestCase):
         res = objgraph.by_type('MyClass')
         self.assertEqual(res, [x])
         # referrers we expect:
-        # 1. this stack frame
+        # 1. this stack frame (except on Python 3.7 where it's somehow missing)
         # 2. the `res` list
         # referrers we don't want:
         # the ``objects`` list in the now-dead stack frame of objgraph.by_type
-        self.assertEqual(len(gc.get_referrers(res[0])), 2)
+        self.assertLessEqual(len(gc.get_referrers(res[0])), 2)
+
+
+class AtAddrsTest(unittest.TestCase):
+
+    def test_at_addrs(self):
+        a = [0, 1, 2]
+        new_ids = objgraph.get_new_ids(limit=0)
+        new_lists = objgraph.at_addrs(new_ids['list'])
+        self.assertIn(a, new_lists)
 
 
 class StringRepresentationTest(GarbageCollectedMixin,
@@ -384,6 +495,20 @@ class StringRepresentationTest(GarbageCollectedMixin,
         self.assertRegex(
             objgraph._edge_label(d, 1, shortnames=False),
             ' [label="mymodule\.MyClass\\n<mymodule\.MyClass object at .*"]')
+
+    def test_short_repr_lambda(self):
+        f = lambda x: x  # noqa
+        lambda_lineno = sys._getframe().f_lineno - 1
+        self.assertEqual('lambda: tests.py:%s' % lambda_lineno,
+                         objgraph._short_repr(f))
+
+    def test_short_repr_function(self):
+        self.assertRegex(objgraph._short_repr(sample_func),
+                         'function sample_func at .*')
+
+
+def sample_func():
+    pass
 
 
 class StubSubprocess(object):

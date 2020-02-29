@@ -3,12 +3,14 @@
 .travis.yml
 CHANGES.rst
 HACKING.rst
+LICENSE
 MANIFEST.in
 Makefile
 README.rst
 appveyor.yml
 objgraph.py
 other-requirements.txt
+release.mk
 setup.cfg
 setup.py
 tests.py
@@ -45,4 +47,6 @@ objgraph.egg-info/PKG-INFO
 objgraph.egg-info/SOURCES.txt
 objgraph.egg-info/dependency_links.txt
 objgraph.egg-info/pbr.json
+objgraph.egg-info/requires.txt
 objgraph.egg-info/top_level.txt
+objgraph.egg-info/zip-safe

@@ -3,8 +3,8 @@ set -efu
 
 pythons="$(py3versions -r 2> /dev/null)"
 
-cp -a docs tests.py "$ADTTMP"
-cd "$ADTTMP"
+cp -a docs tests.py "$AUTOPKGTEST_TMP"
+cd "$AUTOPKGTEST_TMP"
 
 # Skip the setup.py test
 sed -i '/doctest.DocTestSuite()/ d' tests.py

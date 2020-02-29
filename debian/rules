@@ -13,8 +13,8 @@ override_dh_auto_clean:
 	dh_auto_clean
 	rm -rf build docs/_build
 
-override_dh_installchangelogs:
-	dh_installchangelogs CHANGES.rst
-
-override_dh_compress:
-	dh_compress -X.txt -X.inv
+override_dh_installdocs:
+	# Override the heuristics. Given the py2/3 split, the -doc package is the
+	# best place to put this
+	dh_installdocs -p python-objgraph-doc --doc-main-package=python-objgraph-doc
+	dh_installdocs -N python-objgraph-doc
