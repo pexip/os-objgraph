@@ -1,3 +1,9 @@
+objgraph (3.4.0-2pexip1) pexip; urgency=medium
+
+  * Migrate to Buster
+
+ -- Vincent Sanders <vince@pexip.com>  Sat, 29 Feb 2020 18:20:56 +0000
+
 objgraph (3.4.0-2) unstable; urgency=medium
 
   [ Ondřej Nový ]
