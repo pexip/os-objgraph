@@ -1,7 +1,10 @@
-Name: objgraph
-Archive: PyPI
+---
 Bug-Database: https://github.com/mgedmin/objgraph/issues
 Bug-Submit: https://github.com/mgedmin/objgraph/issues/new
-Changelog: https://github.com/mgedmin/objgraph/blob/master/CHANGES.rst
-Homepage: https://mg.pov.lt/objgraph
+Changelog: https://mg.pov.lt/objgraph/CHANGES.html
+Documentation: https://mg.pov.lt/objgraph
+Registry:
+  - Name: PyPI
+    Entry: objgraph
+Repository-Browse: https://github.com/mgedmin/objgraph
 Repository: https://github.com/mgedmin/objgraph

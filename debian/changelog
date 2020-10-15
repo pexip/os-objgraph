@@ -1,3 +1,50 @@
+objgraph (3.5.0-1) unstable; urgency=medium
+
+  [ Stefano Rivera ]
+  * New upstream release.
+  * Refresh patches.
+  * Update upstream metadata.
+  * Bump copyright years.
+  * Bump Standards-Version to 4.5.0, no changes needed.
+  * Drop Build-Depends and autopkgtest Depends on python3-mock, stdlib mock is
+    now used.
+  * Bump xdot to Recommends, objgraph tends to be used directly by developers,
+    so the Recommends set doesn't need to be minimal.
+  * Drop Suggests & Recommends on graphviz & xdot from python-objgraph-doc,
+    there aren't dot files there.
+  * Recommend python3-graphviz, it has been packaged for a while now, and is
+    useful when using objgraph in Jupyter.
+  * Depend on python3-setuptools in the autopkgtest: setup.py is tested.
+
+  [ Ondřej Nový ]
+  * d/control: Update Maintainer field with new Debian Python Team
+    contact address.
+  * d/control: Update Vcs-* fields with new Debian Python Team Salsa
+    layout.
+
+  [ Debian Janitor ]
+  * Apply multi-arch hints.
+    + python-objgraph-doc: Add Multi-Arch: foreign.
+
+ -- Stefano Rivera <stefanor@debian.org>  Wed, 14 Oct 2020 19:45:57 -0700
+
+objgraph (3.4.1-2) unstable; urgency=medium
+
+  * Remove python 2 library (Closes: #937178)
+
+ -- Stefano Rivera <stefanor@debian.org>  Sat, 31 Aug 2019 10:17:55 -0300
+
+objgraph (3.4.1-1) unstable; urgency=medium
+
+  * New upstream release.
+    - With Python 3.7 support.
+  * Refresh patches.
+  * Bump copyright years.
+  * Bump Standards-Version to 4.4.0, no changes needed.
+  * Bump debhelper compat to 12 (and use the B-D syntax).
+
+ -- Stefano Rivera <stefanor@debian.org>  Mon, 08 Jul 2019 15:57:12 -0700
+
 objgraph (3.4.0-2) unstable; urgency=medium
 
   [ Ondřej Nový ]

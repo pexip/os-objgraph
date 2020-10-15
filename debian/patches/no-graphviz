@@ -2,7 +2,7 @@ From: Stefano Rivera <stefanor@debian.org>
 Date: Sun, 18 Feb 2018 18:21:41 -0800
 Subject: Remove dependency on python-graphviz
 
-Not packaged in Debian yet, and not actually needed.
+We reduce this to a Recommends, it's only used by Jupyter Notebooks
 
 Forwarded: not-needed
 ---
@@ -10,14 +10,14 @@ Forwarded: not-needed
  1 file changed, 1 deletion(-)
 
 diff --git a/setup.py b/setup.py
-index ee1bef4..6feb491 100755
+index f28ca18..0325d00 100755
 --- a/setup.py
 +++ b/setup.py
-@@ -83,7 +83,6 @@ setup(
+@@ -80,7 +80,6 @@ setup(
      keywords='object graph visualization graphviz garbage collection',
      py_modules=['objgraph'],
      install_requires=[
 -        'graphviz',  # just for ipython support currently
      ],
-     tests_require=['mock'],
+     tests_require=['mock;python_version=="2.7"'],
      test_suite='tests.test_suite',

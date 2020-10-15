@@ -1,59 +1,39 @@
 Source: objgraph
 Section: python
 Priority: optional
-Maintainer: Debian Python Modules Team <python-modules-team@lists.alioth.debian.org>
+Maintainer: Debian Python Team <team+python@tracker.debian.org>
 Uploaders: Stefano Rivera <stefanor@debian.org>
 Build-Depends:
- debhelper (>= 11),
+ debhelper-compat (= 12),
  dh-python,
  graphviz,
- python-all (>= 2.7),
- python-mock,
- python-setuptools,
- python3-sphinx (>= 1.0.7+dfsg),
  python3-all (>= 3.3),
- python3-mock,
- python3-setuptools
-Standards-Version: 4.2.0
+ python3-graphviz,
+ python3-setuptools,
+ python3-sphinx (>= 1.0.7+dfsg)
+Standards-Version: 4.5.0
 Homepage: https://mg.pov.lt/objgraph/
-Vcs-Git: https://salsa.debian.org/python-team/modules/objgraph.git
-Vcs-Browser: https://salsa.debian.org/python-team/modules/objgraph
+Vcs-Git: https://salsa.debian.org/python-team/packages/objgraph.git
+Vcs-Browser: https://salsa.debian.org/python-team/packages/objgraph
 Rules-Requires-Root: no
 
-Package: python-objgraph
+Package: python3-objgraph
 Architecture: all
-Depends: ${misc:Depends}, ${python:Depends}
-Recommends: graphviz
-Suggests: python-objgraph-doc, xdot
+Depends: ${misc:Depends}, ${python3:Depends}
+Recommends: graphviz, python3-graphviz, xdot
+Suggests: python-objgraph-doc
 Description: Module for exploring Python object reference graphs
  objgraph is a module that lets you visually explore Python object graphs.
  .
  It can be used for counting and statistics, finding root references
  responsible for large object trees and export the object reference graphs in
  graphviz format.
- .
- This package contains the Python 2 version of the library.
-
-Package: python3-objgraph
-Architecture: all
-Depends: ${misc:Depends}, ${python3:Depends}
-Recommends: graphviz
-Suggests: python-objgraph-doc, xdot
-Description: Module for exploring Python object reference graphs (Python3 version)
- objgraph is a module that lets you visually explore Python object graphs.
- .
- It can be used for counting and statistics, finding root references
- responsible for large object trees and export the object reference graphs in
- graphviz format.
- .
- This package contains the Python 3 version of the library.
 
 Package: python-objgraph-doc
 Architecture: all
 Section: doc
 Depends: ${misc:Depends}, ${sphinxdoc:Depends}
-Recommends: graphviz
-Suggests: xdot
+Multi-Arch: foreign
 Description: Module for exploring Python object reference graphs (Documentation)
  objgraph is a module that lets you visually explore Python object graphs.
  .
