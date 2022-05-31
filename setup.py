@@ -72,20 +72,17 @@ setup(
         'License :: OSI Approved :: MIT License',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
-        'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.3',
-        'Programming Language :: Python :: 3.4',
-        'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
     ],
     keywords='object graph visualization graphviz garbage collection',
     py_modules=['objgraph'],
     install_requires=[
         'graphviz',  # just for ipython support currently
     ],
-    tests_require=['mock'],
+    tests_require=['mock;python_version=="2.7"'],
     test_suite='tests.test_suite',
     zip_safe=True,
 )

@@ -12,11 +12,11 @@ import textwrap
 import types
 import unittest
 
-# distutils imports `imp`, which triggers a DeprecationWarning starting with
+# setuptools imports `imp`, which triggers a DeprecationWarning starting with
 # Python 3.4 in the middle of my pristine test suite.  But if I do the import
 # upfront, there's no warning.  I cannot explain this, I'm just happy there's
 # no warning.
-import distutils  # noqa
+import setuptools  # noqa
 
 try:
     from unittest import mock
@@ -131,6 +131,16 @@ SINGLE_ELEMENT_OUTPUT = textwrap.dedent('''\
 ''')
 
 
+SINGLE_ELEMENT_OUTPUT_WITH_ATTR = textwrap.dedent('''\
+    digraph ObjectGraph {
+      node[shape=box, style=filled, fillcolor=white];
+      ${label_a}[fontcolor=red];
+      ${label_a}[label="TestObject\\nTestObject(A)", x="y"];
+      ${label_a}[fillcolor="0,0,1"];
+    }
+''')
+
+
 TWO_ELEMENT_OUTPUT = textwrap.dedent('''\
     digraph ObjectGraph {
       node[shape=box, style=filled, fillcolor=white];
@@ -190,6 +200,18 @@ class ShowGraphTest(unittest.TestCase):
         label = objgraph._obj_node_id(obj)
         self.assertEqual(output_value,
                          format(SINGLE_ELEMENT_OUTPUT,
+                                label_a=label))
+
+    def test_with_extra_node_attrs(self):
+        obj = TestObject.get("A")
+        output = StringIO()
+        objgraph._show_graph([obj], edge_function(), False, output=output,
+                             shortnames=True,
+                             extra_node_attrs=lambda o: {'x': 'y'})
+        output_value = output.getvalue()
+        label = objgraph._obj_node_id(obj)
+        self.assertEqual(output_value,
+                         format(SINGLE_ELEMENT_OUTPUT_WITH_ATTR,
                                 label_a=label))
 
     def test_filename_and_output(self):
@@ -409,7 +431,17 @@ class StringRepresentationTest(GarbageCollectedMixin,
 
         self.assertRegex(
             objgraph._obj_label(x, shortnames=False),
-            'mymodule\.MyClass\\\\n<mymodule\.MyClass object at .*')
+            r'mymodule\.MyClass\\n<mymodule\.MyClass object at .*')
+
+    def test_obj_attrs(self):
+        x = object()
+        self.assertEqual(
+            objgraph._obj_attrs(
+                x,
+                lambda o: {'url': 'http://e.com/' + o.__class__.__name__,
+                           'shape': 'diamond',
+                           'ignored': None}),
+            r', shape="diamond", url="http://e.com/object"')
 
     def test_long_typename_with_no_module(self):
         x = type('MyClass', (), {'__module__': None})()
@@ -477,9 +509,12 @@ class StringRepresentationTest(GarbageCollectedMixin,
                          objgraph._gradient((0.1, 0.2, 0.3),
                                             (0.2, 0.3, 0.4), 0, 0))
 
+    def test_edge_label_frame_locals(self):
+        frame = sys._getframe()
+        self.assertEqual(' [label="f_locals",weight=10]',
+                         objgraph._edge_label(frame, frame.f_locals))
+
     @skipIf(sys.version_info[0] > 2, "Python 3 has no unbound methods")
-    @skipIf(sys.version_info[:2] < (2, 6),
-            "Python 2.5 and older has no __func__")
     def test_edge_label_unbound_method(self):
         class MyClass(object):
             def a_method(self):
@@ -488,13 +523,21 @@ class StringRepresentationTest(GarbageCollectedMixin,
                          objgraph._edge_label(MyClass.a_method,
                                               MyClass.a_method.__func__))
 
+    def test_edge_label_bound_method(self):
+        class MyClass(object):
+            def a_method(self):
+                pass
+        self.assertEqual(' [label="__func__",weight=10]',
+                         objgraph._edge_label(MyClass().a_method,
+                                              MyClass().a_method.__func__))
+
     def test_edge_label_long_type_names(self):
         x = type('MyClass', (), {'__module__': 'mymodule'})()
         d = {x: 1}
 
         self.assertRegex(
             objgraph._edge_label(d, 1, shortnames=False),
-            ' [label="mymodule\.MyClass\\n<mymodule\.MyClass object at .*"]')
+            r' [label="mymodule\.MyClass\n<mymodule\.MyClass object at .*"]')
 
     def test_short_repr_lambda(self):
         f = lambda x: x  # noqa
@@ -618,7 +661,7 @@ class RandomOutputChecker(doctest.OutputChecker):
 
 
 class IgnoreNodeCountChecker(RandomOutputChecker):
-    _r = re.compile('\(\d+ nodes\)$', re.MULTILINE)
+    _r = re.compile(r'\(\d+ nodes\)$', re.MULTILINE)
 
     def check_output(self, want, got, optionflags):
         if optionflags & NODES_VARY:

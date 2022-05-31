@@ -1,12 +1,11 @@
 Metadata-Version: 1.1
 Name: objgraph
-Version: 3.4.0
+Version: 3.5.0
 Summary: Draws Python object reference graphs with graphviz
 Home-page: https://mg.pov.lt/objgraph/
 Author: Marius Gedminas
 Author-email: marius@gedmin.as
 License: MIT
-Description-Content-Type: UNKNOWN
 Description: Python Object Graphs
         ====================
         
@@ -80,6 +79,36 @@ Description: Python Object Graphs
         Changes
         =======
         
+        
+        
+        3.5.0 (2020-10-11)
+        ------------------
+        
+        - Do not require ``mock`` for the test suite on Python 3; use unittest.mock
+          instead.
+        
+        - 100% test coverage for each version of Python rather than combined, using
+          ``coverage-python-version``.
+        
+        - Add the optional ``extra_node_attrs`` parameter to ``show_backrefs`` and
+          ``show_backrefs``
+        
+        - Fix IPython/Jupyter inline graph support code that would kick in even if you
+          explicitly passed a filename='foo.png' argument to
+          ``show_refs``/``show_backrefs``.  See `issue 47
+          <https://github.com/mgedmin/objgraph/issues/47>`_.
+        
+        - Add support for Python 3.8.
+        
+        - Drop support for Python 3.5.
+        
+        
+        3.4.1 (2019-04-23)
+        ------------------
+        
+        - Add support for Python 3.7.
+        
+        - Drop support for Python 3.3 and 3.4.
         
         
         3.4.0 (2018-02-13)
@@ -178,7 +207,7 @@ Description: Python Object Graphs
         
         - Made internal helper methods private. This includes `find_chain`,
           `show_graph`, `obj_node_id`, `obj_label`, `quote`,
-          `long_typename`, `safe_repr`, `short_repr`, 
+          `long_typename`, `safe_repr`, `short_repr`,
           `gradient`, `edge_label`, and `_program_in_path`.
         
         - Correctly determine the name of old-style classes in `count`,
@@ -394,10 +423,7 @@ Classifier: Intended Audience :: Developers
 Classifier: License :: OSI Approved :: MIT License
 Classifier: Operating System :: OS Independent
 Classifier: Programming Language :: Python
-Classifier: Programming Language :: Python :: 2
 Classifier: Programming Language :: Python :: 2.7
-Classifier: Programming Language :: Python :: 3
-Classifier: Programming Language :: Python :: 3.3
-Classifier: Programming Language :: Python :: 3.4
-Classifier: Programming Language :: Python :: 3.5
 Classifier: Programming Language :: Python :: 3.6
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8

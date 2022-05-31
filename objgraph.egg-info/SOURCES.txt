@@ -1,3 +1,4 @@
+.coveragerc
 .gitattributes
 .gitignore
 .travis.yml
@@ -46,7 +47,6 @@ docs/_static/mg.css
 objgraph.egg-info/PKG-INFO
 objgraph.egg-info/SOURCES.txt
 objgraph.egg-info/dependency_links.txt
-objgraph.egg-info/pbr.json
 objgraph.egg-info/requires.txt
 objgraph.egg-info/top_level.txt
 objgraph.egg-info/zip-safe
