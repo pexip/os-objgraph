@@ -20,7 +20,7 @@ Homepage: https://mg.pov.lt/objgraph/
 Vcs-Git: https://salsa.debian.org/python-team/modules/objgraph.git
 Vcs-Browser: https://salsa.debian.org/python-team/modules/objgraph
 Rules-Requires-Root: no
-XS-Pexip-Upstream: http://ftp.debian.org/debian/ buster
+XS-Pexip-Upstream: http://deb.debian.org/debian/ bullseye
 
 Package: python-objgraph
 Architecture: all
