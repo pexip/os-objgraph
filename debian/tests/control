@@ -1,5 +1,2 @@
-Tests: unittests
-Depends: python-mock, python-objgraph, python-all, graphviz
-
 Tests: unittests3
-Depends: python3-mock, python3-objgraph, python3-all, graphviz
+Depends: graphviz, python3-all, python3-objgraph, python3-setuptools
