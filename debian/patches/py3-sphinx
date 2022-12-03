@@ -1,0 +1,58 @@
+From: Marius Gedminas <marius@gedmin.as>
+Date: Fri, 22 Oct 2021 10:33:44 -0700
+Subject: Extract version from objgraph.py without py2 exec
+
+Origin: upstream, https://github.com/mgedmin/objgraph/commit/e96d904f09278ef1a32eb666fb1db7d0d3c778db
+---
+ docs/conf.py | 23 +++++++++++++++++++----
+ 1 file changed, 19 insertions(+), 4 deletions(-)
+
+diff --git a/docs/conf.py b/docs/conf.py
+index bd7c083..85c5a5d 100644
+--- a/docs/conf.py
++++ b/docs/conf.py
+@@ -11,25 +11,40 @@
+ # All configuration values have a default; values that are commented out
+ # serve to show the default.
+ 
+-import sys, os
++import io
++import os
++import re
++import sys
+ 
+ # If extensions (or modules to document with autodoc) are in another directory,
+ # add these directories to sys.path here. If the directory is relative to the
+ # documentation root, use os.path.abspath to make it absolute, like shown here.
+ sys.path.append(os.path.abspath('..'))
+ 
++
+ def relative(filename):
+     here = os.path.dirname('__file__')
+     return os.path.join(here, filename)
+ 
++
++def read(filename):
++    with io.open(relative(filename), encoding='UTF-8') as f:
++        return f.read()
++
++
+ def get_version():
+-    d = {}
+-    exec open(relative('../objgraph.py')).read() in d
+-    return d['__version__']
++    r = re.compile('''^__version__ = ["'](.+)["']$''')
++    for line in read('../objgraph.py').splitlines():
++        m = r.match(line)
++        if m:
++            return m.group(1)
++    raise AssertionError('Could not determine version number from objgraph.py')
++
+ 
+ def get_short_version():
+     return '.'.join(get_version().split('.')[:2])
+ 
++
+ # -- General configuration -----------------------------------------------------
+ 
+ # Add any Sphinx extension module names here, as strings. They can be extensions

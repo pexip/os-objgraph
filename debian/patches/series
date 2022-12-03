@@ -1,2 +1,4 @@
 remove-external-images
 no-graphviz
+py3-sphinx
+python3.11.patch

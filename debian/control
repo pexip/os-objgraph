@@ -4,14 +4,15 @@ Priority: optional
 Maintainer: Debian Python Team <team+python@tracker.debian.org>
 Uploaders: Stefano Rivera <stefanor@debian.org>
 Build-Depends:
- debhelper-compat (= 12),
+ debhelper-compat (= 13),
  dh-python,
  graphviz,
- python3-all (>= 3.3),
+ python3-all,
  python3-graphviz,
  python3-setuptools,
- python3-sphinx (>= 1.0.7+dfsg)
-Standards-Version: 4.5.0
+ python3-sphinx,
+ python3-pytest <!nocheck>
+Standards-Version: 4.6.1
 Homepage: https://mg.pov.lt/objgraph/
 Vcs-Git: https://salsa.debian.org/python-team/packages/objgraph.git
 Vcs-Browser: https://salsa.debian.org/python-team/packages/objgraph
