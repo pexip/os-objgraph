@@ -17,7 +17,7 @@ Homepage: https://mg.pov.lt/objgraph/
 Vcs-Git: https://salsa.debian.org/python-team/packages/objgraph.git
 Vcs-Browser: https://salsa.debian.org/python-team/packages/objgraph
 Rules-Requires-Root: no
-XS-Pexip-Upstream: http://deb.debian.org/debian/ bullseye
+XS-Pexip-Upstream: http://deb.debian.org/debian/ bookworm
 
 Package: python3-objgraph
 Architecture: all
