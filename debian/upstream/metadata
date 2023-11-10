@@ -7,4 +7,4 @@ Registry:
   - Name: PyPI
     Entry: objgraph
 Repository-Browse: https://github.com/mgedmin/objgraph
-Repository: https://github.com/mgedmin/objgraph
+Repository: https://github.com/mgedmin/objgraph.git

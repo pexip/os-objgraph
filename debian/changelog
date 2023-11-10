@@ -1,3 +1,51 @@
+objgraph (3.5.0-6) unstable; urgency=medium
+
+  * Team upload.
+  * d/control: add b-d on pytest to force tests to run via something other
+    than the deprecated "python3 setup.py test" command.
+  * d/tests: run tests with all available python versions.
+
+ -- Louis-Philippe Véronneau <pollo@debian.org>  Fri, 02 Dec 2022 19:42:38 -0500
+
+objgraph (3.5.0-5) unstable; urgency=medium
+
+  [ Debian Janitor ]
+  * Remove constraints unnecessary since buster:
+    + Build-Depends: Drop versioned constraint on python3-all and
+      python3-sphinx.
+  * Update standards version to 4.6.1, no changes needed.
+
+  [ Stefano Rivera ]
+  * Patch: Python 3.11 support. (Closes: #1025015)
+
+ -- Stefano Rivera <stefanor@debian.org>  Mon, 28 Nov 2022 20:37:02 -0400
+
+objgraph (3.5.0-4) unstable; urgency=medium
+
+  * Patch: Avoid a py2-style exec in sphinx docs/conf.py, instead parse the
+  version from the objgraph.py. Fixes FTBFS with python3-sphinx 4.
+
+ -- Stefano Rivera <stefanor@debian.org>  Fri, 22 Oct 2021 10:52:42 -0700
+
+objgraph (3.5.0-3) unstable; urgency=medium
+
+  [ Debian Janitor ]
+  * Bump debhelper from old 12 to 13.
+
+  [ Stefano Rivera ]
+  * Source-only upload.
+  * Bump Standards-Version to 4.6.0, no changes needed.
+  * Bump copyright years.
+  * Bump watch file version to 4.
+
+ -- Stefano Rivera <stefanor@debian.org>  Fri, 17 Sep 2021 21:07:55 -0700
+
+objgraph (3.5.0-2) unstable; urgency=medium
+
+  * Set upstream metadata fields: Repository.
+
+ -- Debian Janitor <janitor@jelmer.uk>  Sat, 21 Aug 2021 13:53:02 +0100
+
 objgraph (3.5.0-1pexip3) pexip-bullseye; urgency=medium
 
   * Bullseye rebuild for ARM64 inclusion
