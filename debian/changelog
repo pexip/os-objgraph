@@ -1,3 +1,9 @@
+objgraph (3.5.0-6+pexip24u3) pexip-bookworm; urgency=medium
+
+  * New versioning scheme
+
+ -- Mark Hymers <mark.hymers@pexip.com>  Thu, 01 Feb 2024 16:14:40 +0000
+
 objgraph (3.5.0-6pexip2) pexip-bookworm; urgency=medium
 
   * Bookworm build for product distribution
